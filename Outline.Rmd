@@ -1,0 +1,212 @@
+---
+title: "Random Portfolios"
+author: "Ross Bennett"
+date: "November 24, 2014"
+output: html_document
+---
+
+Audience: CFRM faculty
+Objective: What is the primary message I want to deliver?
+
+Outline
+  * Why random portfolios
+  * define random portfolio
+  * random portfolio algorithms
+    * simplex
+    * grid search
+    * sample
+  * Implementation in PortfolioAnalytics
+  * Applications
+    * Performance Measurement
+    * Optimization
+      * comparison to other optimization algorithms (de and pso)
+    * Mapping function in differential evolution
+
+== What is a random portfolio? ==
+The basic idea is to sample from the population of portfolios that satisfy the given constraints. Universe of assets and set of constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization.
+
+== Why Random Portfolios? ==
+* Portfolio Optimization
+  * non-convex and complex objective functions
+  * visualize feasible space
+  * embarassingly parallel
+* Extend differential evolution algorithm
+* Performance Measurement
+* Trading Strategy Paremeter Optimization
+
+== Algorithms to Generate Random Portfolios ==
+  * Simplex
+  * Grid Search
+  * Sample
+  * Other?
+
+== Simplex Algorithm ==
+Shaw recommends this as the best method to evenly sample a simplex
+
+w_i = \frac{\log U_i}{\sum_{j=1}^N U_j}
+where U_i are uncorrelated uniform random variables on (0,1)
+
+long only and weights sum to 1
+
+lower bound
+w_i = L_i + (1 - \sum_{j=1}^N L_j \frac{\log U_i}{\sum_{k=1}^N U_k}
+
+FEV-biasing
+w_i = \frac{\log U_i^q}{\sum_{j=1}^N U_j^q}
+
+let q = 2^p
+
+q -> inf, portfolio will be concentrated in one asset
+
+== Interactive visualization of FEV biasing ==
+use code from R/Finance presentation
+
+constraints
+
+
+Advantages
+* fast and efficient method to generate random portfolios
+* control concentration
+
+Disadvantages
+* limited support for constraints
+  * weights sum to 1
+  * lower bound on weights
+  * upper bound on weights?
+  * group?
+  * dollar neutral?
+  * position limits?
+
+== Grid Search Method ==
+* create all possible combinations given a set of feasible weights
+By construction, the portfolio will satisfy box constraints, but no guarantee that any other constraint will.
+
+transform the weights to satisfy sum of weights constraint
+
+transformation may violate box constraints
+
+other constraints?
+  * elimination
+
+== Sample Method ==
+Based on idea by Pat Burns
+mountain lake analogy
+first version
+ * sum of weight and box constraints by construction
+
+== Algorithm ==
+set $S$ of feasible weights
+while ((sum(tportfolio) <= min_sum | sum(tportfolio) >= max_sum) & permutations <= max_permutations) {
+
+while (sum(tportfolio) <= min_sum & i <= length(tportfolio)) {
+# randomly permute and increase a random portfolio element
+weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+}
+
+while (sum(tportfolio) >= max_sum & i <= length(tportfolio)) {
+# randomly permute and decrease a random portfolio element
+weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
+}
+}
+
+any sum of weights
+box constraints
+
+Other constraints?
+* group
+* number of assets
+
+My first attempt at v2 was to add conditions to the outer while loop and cross my fingers
+
+after a lot of testing and frustration, I came to the algorithm that is currently implemented in PortfolioAnalytics
+
+Focus on group
+
+while constraints violated
+
+check for minimum sum of weights
+randomly permute and increase a random portfolio element
+
+check for maximum sum of weights
+randomly permute and decrease a random portfolio element
+
+check for group
+group constraint violation is taking that subset of the portfolio and then you have the exact same problem as a portfolio that violates sum of weights constraint so we can just make a recursive call
+
+similar for other constraints
+by construction
+- sum of weights
+- box
+- group
+- position limit (# of non-zero, # of long/short)
+- leverage
+
+== Interactive visualization of the 3 methods ==
+use slide from R/Finance
+
+== Applications ==
+
+== Performance Measurement ==
+
+== Optimization ==
+complex
+  * component contribution to risk
+  * utility
+
+== Compare to pso and de ==
+
+== mapping function in de ==
+
+
+
+##################### 
+
+but things get complicated when you consider 
+* How do you generate a random set of weights
+* what constraints
+  * sum of weights
+  * box
+  * group
+  * number of assets
+  * etc.
+* how to handle constraints
+  * construction
+  * elimination
+    * what if you eliminate too many?
+
+
+Random Portfolio Methods
+* Simplex
+* Burns Style
+  * Algorithm I wrote for PortfolioAnalytics
+* Grid Search
+
+Benefits
+* satisfy constraints by construction
+* visualize feasible space
+* complex objective functions
+* embarassingly parallel
+* only need to generate random portfolios once for out of sample testing
+
+Motivating Example
+* Component Risk Contribution
+
+Comparison to other global optimizers
+* pso
+* DEoptim
+* GenSA
+
+Applications
+* Portfolio Optimization
+* Performance Measurement
+* seed population and mapping function for DEoptim
+
+
+Simplex Method
+http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1856476
+
+Patrick Burns
+http://www.burns-stat.com/pages/Finance/randport_practice_theory_annotated.pdf
+http://www.portfolioprobe.com/about/random-portfolios-in-finance/
+
+

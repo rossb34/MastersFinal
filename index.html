@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random Portfolios</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Random Portfolios">
+  <meta name="author" content="Ross Bennett">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="libraries/widgets/nvd3/css/nv.d3.css"></link>
+<link rel=stylesheet href="libraries/widgets/nvd3/css/rNVD3.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  <script src="libraries/widgets/nvd3/js/jquery-1.8.2.min.js"></script>
+<script src="libraries/widgets/nvd3/js/d3.v3.min.js"></script>
+<script src="libraries/widgets/nvd3/js/nv.d3.min-new.js"></script>
+<script src="libraries/widgets/nvd3/js/fisheye.js"></script>
+
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Random Portfolios</h1>
+    <h2>CFRM Final Presentation</h2>
+    <p>Ross Bennett<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>What is a random portfolio?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The basic idea is to sample from the population of portfolios that satisfy the given constraints. Universe of assets and set of constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization.</p>
+
+<p>TODO: maybe quote Pat Burns here</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>Why Random Portfolios?</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Portfolio Optimization
+
+<ul>
+<li>Non-convex and complex objective functions</li>
+<li>Visualize feasible space</li>
+<li>Embarassingly parallel</li>
+</ul></li>
+<li>Extend differential evolution algorithm</li>
+<li>Performance Measurement</li>
+<li>Trading Strategy Paremeter Optimization</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Algorithms to Generate Random Portfolios</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Simplex</li>
+<li>Grid Search</li>
+<li>Sample</li>
+</ul>
+
+<!--
+these are the algorithms that are included in PortfolioAnalytics that I am familar with and will talk about. There may be others. Ask Brian.
+-->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Simplex Algorithm</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>MC-POPE algorithm by Shaw</li>
+<li>Shaw recommends this as the best method to evenly sample a simplex</li>
+</ul>
+
+<p>\[
+w_i = \frac{\log U_i}{\sum_{j=1}^N U_j}
+\]</p>
+
+<p>where \(U_i\) is \(U(0,1)\)</p>
+
+<p>long only and weights sum to 1</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-5" style="background:;">
+  <hgroup>
+    <h2>Simplex Algorithm Extensions</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li><p>Lower Bound
+\[
+w_i = L_i + (1 - \sum_{j=1}^N L_j) \frac{\log U_i}{\sum_{k=1}^N U_k}
+\]</p></li>
+<li><p>FEV-biasing
+\[
+w_i = \frac{\log U_i^q}{\sum_{j=1}^N U_j^q}
+\]
+let \(q = 2^p\)</p></li>
+</ul>
+
+<h2>FEV-biasing Visualization</h2>
+
+<ul>
+<li>TODO: use code from R/Finance presentation</li>
+<li>TODO: make a simple shiny app</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-6" style="background:;">
+  <hgroup>
+    <h2>Simplex Algorithm Overview</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li><p>Advantages</p>
+
+<ul>
+<li>fast and efficient method to generate random portfolios</li>
+<li>control portfolio concentration</li>
+</ul></li>
+<li><p>Disadvantages</p>
+
+<ul>
+<li>limited support for constraints</li>
+<li>weights sum to 1</li>
+<li>lower bound on weights</li>
+</ul></li>
+</ul>
+
+<!---
+* upper bound on weights?
+* group?
+* dollar neutral?
+* position limits?
+-->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-7" style="background:;">
+  <hgroup>
+    <h2>Grid Search Method</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Create all possible combinations given a set of feasible weights</p>
+
+<ul>
+<li>The portfolio will satisfy box constraints by construction</li>
+</ul>
+
+<p>How do we handle other constraints?</p>
+
+<ul>
+<li>transform the weights to satisfy sum of weights constraint</li>
+<li>elimination</li>
+</ul>
+
+<!--
+transformation may violate box constraints
+elimination may not leave many random portfolios
+problem with large problems
+-->
+
+<h2>Sample Method</h2>
+
+<ul>
+<li>Based on idea by Pat Burns</li>
+<li>Mountain lake analogy
+first version
+
+<ul>
+<li>sum of weight and box constraints by construction</li>
+</ul></li>
+</ul>
+
+<!--
+it is often the case that the optimal portfolio is on the edge of the feasible space. this algorithm allows us to generate portfolios that evenly cover the interior and edges of feasible space .
+-->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-8" style="background:;">
+  <hgroup>
+    <h2>Sample Method Algorithm</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>set \(S\) of feasible weights
+weights 
+min_sum = lower bound on sum of weights
+max_sum = upper bound on sum of weights</p>
+
+<pre><code class="r">while ((sum(weights) &lt;= min_sum | sum(weights) &gt;= max_sum) &amp; permutations &lt;= max_permutations) {
+  while (sum(weights) &lt;= min_sum &amp; i &lt;= length(weights)) {
+    # randomly permute and increase a random portfolio element
+    # weight_seq[(weight_seq &gt;= cur_val) &amp; (weight_seq &lt;= max[cur_index])]
+  }
+
+  while (sum(weights) &gt;= max_sum &amp; i &lt;= length(weights)) {
+    # randomly permute and decrease a random portfolio element
+    # weight_seq[(weight_seq &lt;= cur_val) &amp; (weight_seq &gt;= min[cur_index])]
+  }
+}
+</code></pre>
+
+<pre><code>## Error: invalid &#39;type&#39; (closure) of argument
+</code></pre>
+
+<!--
+any sum of weights
+box constraints
+
+Other constraints?
+* group
+* number of assets
+-->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-9" style="background:;">
+  <hgroup>
+    <h2>Adding Constraints</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Think hard about the algorithm to support more constraint types.
+Support more constraint types by construction</p>
+
+<ul>
+<li>sum of weights</li>
+<li>box</li>
+<li>group</li>
+<li>position limit (# of non-zero, # of long/short)</li>
+<li>leverage</li>
+</ul>
+
+<!--
+My first attempt at v2 was to add conditions to the outer while loop and cross my fingers
+
+after a lot of testing and frustration, I came to the algorithm that is currently implemented in PortfolioAnalytics
+-->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-10" style="background:;">
+  <hgroup>
+    <h1>Adding Group Constraint</h1>
+  </hgroup>
+  <article data-timings="">
+    <p>TODO: pseudo code to demonstrate modular approach of algorithm and how we can look at the group constraint violation problem as the same problem as a portfolio that violates sum of weights. This results in a simple recursive call</p>
+
+<!--
+while constraints violated
+
+check for minimum sum of weights
+randomly permute and increase a random portfolio element
+
+check for maximum sum of weights
+randomly permute and decrease a random portfolio element
+
+check for group
+group constraint violation is taking that subset of the portfolio and then you have the exact same problem as a portfolio that violates sum of weights constraint so we can just make a recursive call
+-->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-11" style="background:;">
+  <hgroup>
+    <h2>Interactive Visualization of the 3 Methods</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>TODO: use slide from R/Finance</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-12" style="background:;">
+  <hgroup>
+    <h2>Performance Measurement</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>TODO</p>
+
+<ul>
+<li>explain general approach</li>
+<li>problems with traditional approach</li>
+<li>advantages of using random portfolios</li>
+<li>example from Burns RP for performance measurement (I think I already have code to do this)</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-13" style="background:;">
+  <hgroup>
+    <h2>Optimization</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>TODO</p>
+
+<ul>
+<li>component contribution to risk</li>
+<li>expected utility</li>
+<li>use examples from R/Finance presentation</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-14" style="background:;">
+  <hgroup>
+    <h2>Compare to pso/de</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>TODO: simple example comparing the untransformed optimal solution from pso and/or de</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-15" style="background:;">
+  <hgroup>
+    <h2>DEoptim Mapping Function</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>DEoptim only supports box constraints</li>
+<li>random portfolio logic is used in a mapping function in DEoptim</li>
+<li>TODO: diagram of DEoptim where mapping function is used</li>
+<li>constraints implemented in random portfolios now implemented in DEoptim</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-16" style="background:;">
+  <hgroup>
+    <h2>Conclusion</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>TODO</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-17" style="background:;">
+  <hgroup>
+    <h2>Questions?</h2>
+  </hgroup>
+  <article data-timings="">
+    
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-18" style="background:;">
+  <hgroup>
+    <h2>References</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>TODO</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='What is a random portfolio?'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Why Random Portfolios?'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Algorithms to Generate Random Portfolios'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Simplex Algorithm'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title='Simplex Algorithm Extensions'>
+         5
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=6 title='Simplex Algorithm Overview'>
+         6
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=7 title='Grid Search Method'>
+         7
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=8 title='Sample Method Algorithm'>
+         8
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=9 title='Adding Constraints'>
+         9
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=10 title='Adding Group Constraint'>
+         10
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=11 title='Interactive Visualization of the 3 Methods'>
+         11
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=12 title='Performance Measurement'>
+         12
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=13 title='Optimization'>
+         13
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=14 title='Compare to pso/de'>
+         14
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=15 title='DEoptim Mapping Function'>
+         15
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=16 title='Conclusion'>
+         16
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=17 title='Questions?'>
+         17
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=18 title='References'>
+         18
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
