@@ -11,9 +11,9 @@ mode        : selfcontained
 
 
 ## What is a random portfolio?
-The basic idea is to sample from the population of portfolios that satisfy the given constraints. Universe of assets and set of constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization.
+The basic idea is to sample from the population of portfolios that satisfy the given constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization and other applications.
 
-TODO: maybe quote Pat Burns here
+> "Random portfolios have the power to revolutionize fund management. You might think that means they must be esoteric and complex. You would be wrong — the idea is very simple." - Patrick Burns
 
 ---
 
@@ -21,9 +21,9 @@ TODO: maybe quote Pat Burns here
 * Portfolio Optimization
   * Non-convex and complex objective functions
   * Visualize feasible space
-  * Embarassingly parallel
-* Extend differential evolution algorithm
+  * Easily parallelizable
 * Performance Measurement
+* Extend differential evolution algorithm
 * Trading Strategy Paremeter Optimization
 
 ---
@@ -40,16 +40,18 @@ these are the algorithms that are included in PortfolioAnalytics that I am famil
 ---
 
 ## Simplex Algorithm
-* MC-POPE algorithm by Shaw
-* Shaw recommends this as the best method to evenly sample a simplex
+* Monte Carlo Portfolio Optimization in a Parallel Environment (MC-POPE) method by William T. Shaw.
+* Shaw recommends this as the best method to evenly sample a simplex or a subject of it.
 
 $$
 w_i = \frac{\log U_i}{\sum_{j=1}^N U_j}
 $$
 
-where $U_i$ is $U(0,1)$
+where $U_i$ are uncorrelated random variables on $U(0,1)$
 
-long only and weights sum to 1
+<!--
+implicit constraints of long only and weights sum to 1
+-->
 
 ---
 
@@ -59,27 +61,28 @@ $$
 w_i = L_i + (1 - \sum_{j=1}^N L_j) \frac{\log U_i}{\sum_{k=1}^N U_k}
 $$
 
-* FEV-biasing
+* FEV-Biasing
 $$
 w_i = \frac{\log U_i^q}{\sum_{j=1}^N U_j^q}
 $$
 let $q = 2^p$
 
-## FEV-biasing Visualization
-* TODO: use code from R/Finance presentation
-* TODO: make a simple shiny app
+---
+
+## FEV-Biasing Visualization
+![](figures/fev_plot.png)
 
 ---
 
 ## Simplex Algorithm Overview
-* Advantages
-  * fast and efficient method to generate random portfolios
-  * control portfolio concentration
+Advantages
+  * Fast and efficient method to generate random portfolios
+  * Control portfolio concentration
 
-* Disadvantages
-  * limited support for constraints
-    * weights sum to 1
-    * lower bound on weights
+Disadvantages
+  * Limited support for constraints
+    * Weights sum to 1
+    * Lower bound on weights
   
 <!---
 * upper bound on weights?
@@ -95,50 +98,53 @@ Create all possible combinations given a set of feasible weights
 * The portfolio will satisfy box constraints by construction
 
 How do we handle other constraints?
-* transform the weights to satisfy sum of weights constraint
+* transformation
 * elimination
 
 <!--
 transformation may violate box constraints
 elimination may not leave many random portfolios
-problem with large problems
--->
-
-## Sample Method
-* Based on idea by Pat Burns
-* Mountain lake analogy
-first version
- * sum of weight and box constraints by construction
-
-<!--
-it is often the case that the optimal portfolio is on the edge of the feasible space. this algorithm allows us to generate portfolios that evenly cover the interior and edges of feasible space .
+problem with large problems (n!)
 -->
 
 ---
 
 ## Sample Method Algorithm
-set $S$ of feasible weights
-weights 
-min_sum = lower bound on sum of weights
-max_sum = upper bound on sum of weights
-
-
-```{r, tidy=FALSE}
-while ((sum(weights) <= min_sum | sum(weights) >= max_sum) & permutations <= max_permutations) {
-  while (sum(weights) <= min_sum & i <= length(weights)) {
-    # randomly permute and increase a random portfolio element
-    # weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+Based on idea by Patrick Burns
+```{r, tidy=FALSE, eval=FALSE}
+foo <- function(weights, min_sum, max_sum, min, max, ...){
+  while (sum(weights) <= min_sum | sum(weights) >= max_sum) {
+    while (sum(weights) <= min_sum) {
+      # i is a randomly selected index of weights vector
+      tmpS <- S[(S >= cur_val) & (S <= max[i])]
+      weights[i] <- tmpS[sample.int(1, length(tmpS))]
+    }
+    while (sum(weights) >= max_sum) {
+      # i is a randomly selected index of weights vector
+      tmpS <- S[(S >= cur_val) & (S <= max[i])]
+      weights[i] <- tmpS[sample.int(1, length(tmpS))]
+    }
   }
-  
-  while (sum(weights) >= max_sum & i <= length(weights)) {
-    # randomly permute and decrease a random portfolio element
-    # weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
-  }
+return(weights)
 }
 ```
-
+* Note: code snippet is intentionally incomplete for the purpose of slides
 
 <!--
+Mountain lake analogy
+
+This is the most flexible method, but also the slowest, and can generate portfolios to satisfy sum of weights, box, group, position limit constraints.
+
+it is often the case that the optimal portfolio is on the edge of the feasible space. this algorithm allows us to generate portfolios that evenly cover the interior and edges of feasible space.
+
+* $S$ is the of feasible weights
+* $weights$ is the vector of portfolio weights
+* $min_sum$ is the lower bound on sum of weights
+* $max_sum$ is the upper bound on sum of weights
+* $min$ is the vector of lower bound box constraints
+* $max$ is the vector of upper bound box constraints
+randomly permute and increase a random portfolio element
+randomly permute and decrease a random portfolio element
 any sum of weights
 box constraints
 
@@ -150,12 +156,11 @@ Other constraints?
 ---
 
 ## Adding Constraints
-Think hard about the algorithm to support more constraint types.
-Support more constraint types by construction
+Think hard about the algorithm to support more constraint types by construction of the portfolio.
 * sum of weights
 * box
 * group
-* position limit (# of non-zero, # of long/short)
+* position limit (# of non-zero, # of long/short, etc.)
 * leverage
 
 <!--
@@ -166,10 +171,22 @@ after a lot of testing and frustration, I came to the algorithm that is currentl
 
 ---
 
-# Adding Group Constraint
-TODO: pseudo code to demonstrate modular approach of algorithm and how we can look at the group constraint violation problem as the same problem as a portfolio that violates sum of weights. This results in a simple recursive call
+## Adding Group Constraint
+```{r, eval=FALSE, tidy=FALSE}
+rp <- function(x){
+  while(violate_constraints(x)){
+    x <- check_maxsum(x)
+    x <- check_minsum(x)
+    if(violate_group_constraints(x))
+      x <- rp(x)
+  }
+  return(x)
+}
+```
+* Note: code snippet is intentionally incomplete for the purpose of the slides
 
 <!--
+pseudo code to demonstrate modular approach of the algorithm and how we can look at the group constraint violation problem as the same problem as a portfolio that violates sum of weights. This results in a simple recursive call
 while constraints violated
 
 check for minimum sum of weights
@@ -184,43 +201,202 @@ group constraint violation is taking that subset of the portfolio and then you h
 
 ---
 
-## Interactive Visualization of the 3 Methods
-TODO: use slide from R/Finance
+## Interactive Visualization of RP Methods
+```{r, results = 'asis', comment = NA, message = F, echo = F}
+load("figures/rp_viz.rda")
+rp_viz$show('inline')
+```
+
+<!--
+The feasible space is computed using the EDHEC data for a long only portfolio with a search size of 2000.
+-->
 
 ---
 
 ## Performance Measurement
-TODO
+### Annual Information Ratio Comparison
+TODO: explain data, benchmarks, etc.
+Are we measuring skill or luck?
+
+<!--
 * explain general approach
 * problems with traditional approach
 * advantages of using random portfolios
-* example from Burns RP for performance measurement (I think I already have code to do this)
+-->
+
+---
+
+## Information Ratio
+![](performance_results/ir.png)
+
+---
+
+## Zero Skill Managers
+explain how to generate returns for zero skill managers
+
+
+---
+
+## Zero Skill Managers
+![](performance_results/zsm.png)
+
+---
+
+## Annualized Sharpe Ratio of Zero Skill Managers
+Quantiles
+```{r, eval=FALSE}
+       0%       25%       50%       75%      100% 
+0.9486588 1.2462714 1.4058532 1.5354576 1.9824632 
+```
+![](performance_results/zsm_den.png)
 
 ---
 
 ## Optimization
-TODO
-* component contribution to risk
-* expected utility
-* use examples from R/Finance presentation
+
+### EDHEC Data Setup
+Here we will look at portfolio optimization in the context of portfolio of hedge funds.
+
+* EDHEC-Risk Alternative Indexes monthly returns from 1/31/1997 to 1/31/2014
+
+Relative Value | Directional
+-------------- | -----------
+Convertible Arbitrage (CA) | CTA Global (CTAG)
+Equity Market Neutral (EMN) | Emerging Markets (EM)
+Fixed Income Arbitrage (FIA) | Global Macro (GM)
+
+<!--
+* Chosen to represent investing in hedge funds with different styles
+* Not necessarily investable
+* Style definitions
+-->
 
 ---
 
-## Compare to pso/de
-* TODO: simple example comparing the untransformed optimal solution from pso and/or de
+## Monthly Returns
+![](figures/relative_barvar.png)
+![](figures/directional_barvar.png)
+
+<!--
+Easy to see the relative volatility
+Periods of coincident drawdowns
+-->
 
 ---
 
-## DEoptim Mapping Function
-* DEoptim only supports box constraints
-* random portfolio logic is used in a mapping function in DEoptim
-* TODO: diagram of DEoptim where mapping function is used
-* constraints implemented in random portfolios now implemented in DEoptim
+## Minimum Expected Shortfall
+Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy.
+
+* Minimize Modified Expected Shortfall
+* Minimize Modified Expected Shortfall with Risk Budget Limit
+* Minimize Modified Expected Shortfall with Equal Risk Contribution
+
+<!--
+Add risk budget objective to minimize concentration of percentage component contribution to risk. Concentration is defined as the Herfindahl Hirschman Index (HHI).
+
+$$ \sum_{i=1}^n x_i^2 $$
+
+ES is coherent and is a convex function of the weights
+
+We are actually using modified ES to take into account the higher moments because the return distribution displays skewness and kurtosis. Modified ES uses the Cornish-Fisher estimate of ES.
+-->
+
+---
+
+## Plot in Risk-Return Space
+![](figures/opt_minES.png)
+
+---
+
+## Chart Risk Budgets
+![](figures/rb_minES.png)
+![](figures/eqrb_minES.png)
+
+<!--
+talk about neighbor portfolios
+-->
+
+---
+
+## Maximize CRRA
+Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martellini paper. We use the same data as Example 3.
+
+$$
+\begin{aligned}
+& \underset{w}{\text{maximize}}
+& & EU(w) \\
+& \text{subject to}
+& & \sum_{i=1}^N w_i\\
+& & & w_i \geq 0
+\end{aligned}
+$$
+
+$$
+EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) + 
+\frac{\lambda (\lambda + 1)}{6} m_{(3)}(w) -
+\frac{\lambda (\lambda + 1) (\lambda + 2)}{24} m_{(4)}(w)
+$$
+
+<!---
+* This example will demonstrate a custom moment function and a custom objective function.
+* This is an interesting objective function
+* An increase in the 2nd and 4th moment will decrease the objective function
+* An increase in the lambda value places a bigger penalty on the higher moments
+-->
+
+---
+
+## Chart Results
+![](figures/crra_RR_ES.png)
+![](figures/crra_RR_StdDev.png)
+
+<!--
+what results? what lambda?
+
+It is very interesting to look at the feasible space in terms of different measures for risk. It appears that the optimal CRRA portfolio is close to the minimum StdDev portfolio, but nowhere near the minimum ES portfolio.
+-->
+
+---
+
+## DEoptim Extensions
+* Mapping function in DEoptim
+* ![](de.png)
+* Seed population
+
+
+<!--
+constraints implemented in random portfolios now implemented in DEoptim
+
+random portfolio logic is used in a 
+
+DEoptim only supports box constraints
+
+an optional function that will be run after each population is created, but before the population is passed to the objective function. This allows the user to impose integer/cardinality constriants.
+-->
 
 ---
 
 ## Conclusion
-TODO
+
+* Introduced the goals and summary of PortfolioAnalytics
+* Demonstrated the flexibility through examples
+* Exciting plans for GSOC 2014
+    * Support for regime switching
+    * Support for supervised learning
+    * many more
+
+#### Acknowledgements
+Many thanks to...
+
+* UW CF&RM Program
+* GSoC Mentors: Brian Peterson, Peter Carl, Doug Martin, and Guy Yollin
+
+<!---
+- One of the best things about GSoC is the opportunity to work and interact with the mentors.
+- Thank the GSoC mentors for offering help and guidance during the GSoC project and after as I continued to work on the PortfolioAnalytics package.
+- R/Finance Committee for the conference and the opportunity to talk about PortfolioAnalytics.
+- Google for funding the Google Summer of Code for PortfolioAnalytics and many other proposals for R
+-->
 
 ---
 
