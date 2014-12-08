@@ -9,14 +9,6 @@ widgets     : mathjax
 mode        : selfcontained
 ---
 
-
-## What is a random portfolio?
-The basic idea is to sample from the population of portfolios that satisfy the given constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization and other applications.
-
-> "Random portfolios have the power to revolutionize fund management. You might think that means they must be esoteric and complex. You would be wrong — the idea is very simple." - Patrick Burns
-
----
-
 ## Why Random Portfolios?
 * Portfolio Optimization
   * Non-convex and complex objective functions
@@ -25,6 +17,22 @@ The basic idea is to sample from the population of portfolios that satisfy the g
 * Performance Measurement
 * Extend differential evolution algorithm
 * Trading Strategy Paremeter Optimization
+
+<!--
+Intro slide
+give a brief overview of each bullet point
+-->
+
+---
+
+## What is a random portfolio?
+The basic idea is to sample from the population of portfolios that satisfy the given constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization and other applications.
+
+> "Random portfolios have the power to revolutionize fund management. You might think that means they must be esoteric and complex. You would be wrong — the idea is very simple." - Patrick Burns
+
+<!--
+explain what a random portfolio is
+-->
 
 ---
 
@@ -41,7 +49,6 @@ these are the algorithms that are included in PortfolioAnalytics that I am famil
 
 ## Simplex Algorithm
 * Monte Carlo Portfolio Optimization in a Parallel Environment (MC-POPE) method by William T. Shaw.
-* Shaw recommends this as the best method to evenly sample a simplex or a subject of it.
 
 $$
 w_i = \frac{\log U_i}{\sum_{j=1}^N U_j}
@@ -50,6 +57,8 @@ $$
 where $U_i$ are uncorrelated random variables on $U(0,1)$
 
 <!--
+Shaw recommends this as the best method to evenly sample a simplex or a subject of it.
+
 implicit constraints of long only and weights sum to 1
 -->
 
@@ -67,10 +76,21 @@ w_i = \frac{\log U_i^q}{\sum_{j=1}^N U_j^q}
 $$
 let $q = 2^p$
 
+<!--
+q -> Inf leads to a portfolio concentrated in a single asset
+increasing q will lead to more concentrated portfolios
+-->
+
 ---
 
 ## FEV-Biasing Visualization
 ![](figures/fev_plot.png)
+
+<!--
+can see that q = 0 is concentrated around equal weight portfolio
+
+increasing q will lead to more concentrated portfolios
+-->
 
 ---
 
@@ -84,11 +104,13 @@ Disadvantages
     * Weights sum to 1
     * Lower bound on weights
   
-<!---
-* upper bound on weights?
-* group?
-* dollar neutral?
-* position limits?
+<!--
+fast and efficient because it is fast to generate uniform random number
+upper bound on weights?
+group?
+dollar neutral?
+position limits?
+handle more complex constraints by elimination
 -->
 
 ---
@@ -113,16 +135,15 @@ problem with large problems (n!)
 Based on idea by Patrick Burns
 
 ```r
-foo <- function(weights, min_sum, max_sum, min, max, ...){
+foo <- function(weights, min_sum, max_sum, min, max, S, ...){
   while (sum(weights) <= min_sum | sum(weights) >= max_sum) {
+    # i is a randomly selected index of weights vector
     while (sum(weights) <= min_sum) {
-      # i is a randomly selected index of weights vector
-      tmpS <- S[(S >= cur_val) & (S <= max[i])]
+      tmpS <- S[(S >= weights[i]) & (S <= max[i])]
       weights[i] <- tmpS[sample.int(1, length(tmpS))]
     }
     while (sum(weights) >= max_sum) {
-      # i is a randomly selected index of weights vector
-      tmpS <- S[(S >= cur_val) & (S <= max[i])]
+      tmpS <- S[(S >= weights[i]) & (S <= max[i])]
       weights[i] <- tmpS[sample.int(1, length(tmpS))]
     }
   }
@@ -144,8 +165,13 @@ it is often the case that the optimal portfolio is on the edge of the feasible s
 * $max_sum$ is the upper bound on sum of weights
 * $min$ is the vector of lower bound box constraints
 * $max$ is the vector of upper bound box constraints
-randomly permute and increase a random portfolio element
-randomly permute and decrease a random portfolio element
+
+increase loop
+- randomly permute and increase a random portfolio element
+
+decrease loop
+- randomly permute and decrease a random portfolio element
+
 any sum of weights
 box constraints
 
@@ -157,7 +183,7 @@ Other constraints?
 ---
 
 ## Adding Constraints
-Think hard about the algorithm to support more constraint types by construction of the portfolio.
+Extend algorithm to support more constraint types. By construction, the random portfolio satisfies the following constraints:
 * sum of weights
 * box
 * group
@@ -166,6 +192,8 @@ Think hard about the algorithm to support more constraint types by construction 
 
 <!--
 My first attempt at v2 was to add conditions to the outer while loop and cross my fingers
+
+I was forced to think hard about the algorithm
 
 after a lot of testing and frustration, I came to the algorithm that is currently implemented in PortfolioAnalytics
 -->
@@ -37472,6 +37500,10 @@ group constraint violation is taking that subset of the portfolio and then you h
 
 <!--
 The feasible space is computed using the EDHEC data for a long only portfolio with a search size of 2000.
+
+Note how grid search does not cover the boundary very well
+
+sample and simplex are very similar (mostly because of the choice of constraints. More restrictive constraints would mean fewer dots for simplex method
 -->
 
 ---
@@ -37482,6 +37514,28 @@ TODO: explain data, benchmarks, etc.
 Are we measuring skill or luck?
 
 <!--
+most performance analysis is relative to a benchmark
+
+three artificial benchmarks
+- equal weight
+- random portfolio 1
+- random portfolio 2
+
+data
+
+
+constraints
+
+* In some quarters there is a strong tendency for the benchmark to outperform  the random portfolios, in others a strong tendency for the benchmark to underperform.
+
+* A benchmark will be hard to beat during periods when the most heavily weighted assets in the benchmark happen to do well. Likewise, when the assets with large weights in the benchmark do relatively poorly, then the benchmark will be easy to beat.
+
+* Clearly the more unequal the weights in a benchmark, the more extreme the swings will be in the probability of outperforming. In this regard, the random benchmarks that are used here are not at all extreme compared to many indices that are used in practice as benchmarks.
+
+* The measurement of skill with random portfolios avoids some of the noise that is introduced when performance is measured relative to a benchmark.
+
+* need to know constraints
+
 * explain general approach
 * problems with traditional approach
 * advantages of using random portfolios
@@ -37495,13 +37549,33 @@ Are we measuring skill or luck?
 ---
 
 ## Zero Skill Managers
-explain how to generate returns for zero skill managers
+* 10,000 random portfolios
+* 1,000 zero skill managers
+* annual rebalancing
+* weights sum to 1
+* no asset can have a weight less than 0 or greater than 0.4
 
+<!--
+edhec data
+CA, EMN, FIA, CTAG, EM, GM
+1997-01-31 to 2014-01-31
+
+Mandates that are based on random portfolios allow fund managers to play to their strengths because they need not be tied to a benchmark. This also allows more flexibility for the investor to shape the behavior of the fund managers to best advantage.
+
+Other uses of random portfolios include the assessment of the opportunity set available to a fund manager with a given strategy.
+-->
 
 ---
 
 ## Zero Skill Managers
 ![](performance_results/zsm.png)
+
+<!--
+looks similar to Monte Carlo
+no distributional assumptions, only based on constraints
+assessment of the opportunity set available to a fund manager with a given strategy.
+can use whatever measure of utility
+-->
 
 ---
 
@@ -37532,7 +37606,6 @@ Fixed Income Arbitrage (FIA) | Global Macro (GM)
 <!--
 * Chosen to represent investing in hedge funds with different styles
 * Not necessarily investable
-* Style definitions
 -->
 
 ---
@@ -37578,12 +37651,13 @@ We are actually using modified ES to take into account the higher moments becaus
 
 <!--
 talk about neighbor portfolios
+could use this as a threshold for rebalancing
 -->
 
 ---
 
 ## Maximize CRRA
-Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martellini paper. We use the same data as Example 3.
+Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martellini paper. 
 
 $$
 \begin{aligned}
@@ -37616,6 +37690,7 @@ $$
 
 <!--
 what results? what lambda?
+lambda=10
 
 It is very interesting to look at the feasible space in terms of different measures for risk. It appears that the optimal CRRA portfolio is close to the minimum StdDev portfolio, but nowhere near the minimum ES portfolio.
 -->
@@ -37629,30 +37704,28 @@ It is very interesting to look at the feasible space in terms of different measu
 
 
 <!--
+DEoptim is a global optimization in the class of genetic algorithms
+
+DEoptim only supports box constraints
+
 constraints implemented in random portfolios now implemented in DEoptim
 
 random portfolio logic is used in a 
 
-DEoptim only supports box constraints
-
-an optional function that will be run after each population is created, but before the population is passed to the objective function. This allows the user to impose integer/cardinality constriants.
+mapping function an optional function that will be run after each population is created, but before the population is passed to the objective function. This allows the user to impose integer/cardinality constriants.
 -->
 
 ---
 
 ## Conclusion
-
-* Introduced the goals and summary of PortfolioAnalytics
-* Demonstrated the flexibility through examples
-* Exciting plans for GSOC 2014
-    * Support for regime switching
-    * Support for supervised learning
-    * many more
+* Introduced algorithms and applications for random portfolios
+* Demonstrated the flexibility by example
+* More work to do on algorithms and applications
 
 #### Acknowledgements
 Many thanks to...
 
-* UW CF&RM Program
+* UW CF&RM Program faculty
 * GSoC Mentors: Brian Peterson, Peter Carl, Doug Martin, and Guy Yollin
 
 <!---

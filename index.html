@@ -48,21 +48,6 @@
     <!-- SLIDES -->
     <slide class="" id="slide-1" style="background:;">
   <hgroup>
-    <h2>What is a random portfolio?</h2>
-  </hgroup>
-  <article data-timings="">
-    <p>The basic idea is to sample from the population of portfolios that satisfy the given constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization and other applications.</p>
-
-<blockquote>
-<p>&quot;Random portfolios have the power to revolutionize fund management. You might think that means they must be esoteric and complex. You would be wrong — the idea is very simple.&quot; - Patrick Burns</p>
-</blockquote>
-
-  </article>
-  <!-- Presenter Notes -->
-</slide>
-
-<slide class="" id="slide-2" style="background:;">
-  <hgroup>
     <h2>Why Random Portfolios?</h2>
   </hgroup>
   <article data-timings="">
@@ -78,6 +63,30 @@
 <li>Extend differential evolution algorithm</li>
 <li>Trading Strategy Paremeter Optimization</li>
 </ul>
+
+<!--
+Intro slide
+give a brief overview of each bullet point
+-->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>What is a random portfolio?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The basic idea is to sample from the population of portfolios that satisfy the given constraints. The idea is simple, but is a very flexible and powerful approach for portfolio optimization and other applications.</p>
+
+<blockquote>
+<p>&quot;Random portfolios have the power to revolutionize fund management. You might think that means they must be esoteric and complex. You would be wrong — the idea is very simple.&quot; - Patrick Burns</p>
+</blockquote>
+
+<!--
+explain what a random portfolio is
+-->
 
   </article>
   <!-- Presenter Notes -->
@@ -109,7 +118,6 @@ these are the algorithms that are included in PortfolioAnalytics that I am famil
   <article data-timings="">
     <ul>
 <li>Monte Carlo Portfolio Optimization in a Parallel Environment (MC-POPE) method by William T. Shaw.</li>
-<li>Shaw recommends this as the best method to evenly sample a simplex or a subject of it.</li>
 </ul>
 
 <p>\[
@@ -119,6 +127,8 @@ w_i = \frac{\log U_i}{\sum_{j=1}^N U_j}
 <p>where \(U_i\) are uncorrelated random variables on \(U(0,1)\)</p>
 
 <!--
+Shaw recommends this as the best method to evenly sample a simplex or a subject of it.
+
 implicit constraints of long only and weights sum to 1
 -->
 
@@ -143,6 +153,11 @@ w_i = \frac{\log U_i^q}{\sum_{j=1}^N U_j^q}
 let \(q = 2^p\)</p></li>
 </ul>
 
+<!--
+q -> Inf leads to a portfolio concentrated in a single asset
+increasing q will lead to more concentrated portfolios
+-->
+
   </article>
   <!-- Presenter Notes -->
 </slide>
@@ -153,6 +168,12 @@ let \(q = 2^p\)</p></li>
   </hgroup>
   <article data-timings="">
     <p><img src="figures/fev_plot.png" alt=""></p>
+
+<!--
+can see that q = 0 is concentrated around equal weight portfolio
+
+increasing q will lead to more concentrated portfolios
+-->
 
   </article>
   <!-- Presenter Notes -->
@@ -181,11 +202,13 @@ let \(q = 2^p\)</p></li>
 </ul></li>
 </ul>
 
-<!---
-* upper bound on weights?
-* group?
-* dollar neutral?
-* position limits?
+<!--
+fast and efficient because it is fast to generate uniform random number
+upper bound on weights?
+group?
+dollar neutral?
+position limits?
+handle more complex constraints by elimination
 -->
 
   </article>
@@ -227,16 +250,15 @@ problem with large problems (n!)
   <article data-timings="">
     <p>Based on idea by Patrick Burns</p>
 
-<pre><code class="r">foo &lt;- function(weights, min_sum, max_sum, min, max, ...){
+<pre><code class="r">foo &lt;- function(weights, min_sum, max_sum, min, max, S, ...){
   while (sum(weights) &lt;= min_sum | sum(weights) &gt;= max_sum) {
+    # i is a randomly selected index of weights vector
     while (sum(weights) &lt;= min_sum) {
-      # i is a randomly selected index of weights vector
-      tmpS &lt;- S[(S &gt;= cur_val) &amp; (S &lt;= max[i])]
+      tmpS &lt;- S[(S &gt;= weights[i]) &amp; (S &lt;= max[i])]
       weights[i] &lt;- tmpS[sample.int(1, length(tmpS))]
     }
     while (sum(weights) &gt;= max_sum) {
-      # i is a randomly selected index of weights vector
-      tmpS &lt;- S[(S &gt;= cur_val) &amp; (S &lt;= max[i])]
+      tmpS &lt;- S[(S &gt;= weights[i]) &amp; (S &lt;= max[i])]
       weights[i] &lt;- tmpS[sample.int(1, length(tmpS))]
     }
   }
@@ -261,8 +283,13 @@ it is often the case that the optimal portfolio is on the edge of the feasible s
 * $max_sum$ is the upper bound on sum of weights
 * $min$ is the vector of lower bound box constraints
 * $max$ is the vector of upper bound box constraints
-randomly permute and increase a random portfolio element
-randomly permute and decrease a random portfolio element
+
+increase loop
+- randomly permute and increase a random portfolio element
+
+decrease loop
+- randomly permute and decrease a random portfolio element
+
 any sum of weights
 box constraints
 
@@ -280,7 +307,7 @@ Other constraints?
     <h2>Adding Constraints</h2>
   </hgroup>
   <article data-timings="">
-    <p>Think hard about the algorithm to support more constraint types by construction of the portfolio.</p>
+    <p>Extend algorithm to support more constraint types. By construction, the random portfolio satisfies the following constraints:</p>
 
 <ul>
 <li>sum of weights</li>
@@ -292,6 +319,8 @@ Other constraints?
 
 <!--
 My first attempt at v2 was to add conditions to the outer while loop and cross my fingers
+
+I was forced to think hard about the algorithm
 
 after a lot of testing and frustration, I came to the algorithm that is currently implemented in PortfolioAnalytics
 -->
@@ -37611,6 +37640,10 @@ group constraint violation is taking that subset of the portfolio and then you h
 
 <!--
 The feasible space is computed using the EDHEC data for a long only portfolio with a search size of 2000.
+
+Note how grid search does not cover the boundary very well
+
+sample and simplex are very similar (mostly because of the choice of constraints. More restrictive constraints would mean fewer dots for simplex method
 -->
 
   </article>
@@ -37628,6 +37661,28 @@ The feasible space is computed using the EDHEC data for a long only portfolio wi
 Are we measuring skill or luck?</p>
 
 <!--
+most performance analysis is relative to a benchmark
+
+three artificial benchmarks
+- equal weight
+- random portfolio 1
+- random portfolio 2
+
+data
+
+
+constraints
+
+* In some quarters there is a strong tendency for the benchmark to outperform  the random portfolios, in others a strong tendency for the benchmark to underperform.
+
+* A benchmark will be hard to beat during periods when the most heavily weighted assets in the benchmark happen to do well. Likewise, when the assets with large weights in the benchmark do relatively poorly, then the benchmark will be easy to beat.
+
+* Clearly the more unequal the weights in a benchmark, the more extreme the swings will be in the probability of outperforming. In this regard, the random benchmarks that are used here are not at all extreme compared to many indices that are used in practice as benchmarks.
+
+* The measurement of skill with random portfolios avoids some of the noise that is introduced when performance is measured relative to a benchmark.
+
+* need to know constraints
+
 * explain general approach
 * problems with traditional approach
 * advantages of using random portfolios
@@ -37653,7 +37708,23 @@ Are we measuring skill or luck?</p>
     <h2>Zero Skill Managers</h2>
   </hgroup>
   <article data-timings="">
-    <p>explain how to generate returns for zero skill managers</p>
+    <ul>
+<li>10,000 random portfolios</li>
+<li>1,000 zero skill managers</li>
+<li>annual rebalancing</li>
+<li>weights sum to 1</li>
+<li>no asset can have a weight less than 0 or greater than 0.4</li>
+</ul>
+
+<!--
+edhec data
+CA, EMN, FIA, CTAG, EM, GM
+1997-01-31 to 2014-01-31
+
+Mandates that are based on random portfolios allow fund managers to play to their strengths because they need not be tied to a benchmark. This also allows more flexibility for the investor to shape the behavior of the fund managers to best advantage.
+
+Other uses of random portfolios include the assessment of the opportunity set available to a fund manager with a given strategy.
+-->
 
   </article>
   <!-- Presenter Notes -->
@@ -37665,6 +37736,13 @@ Are we measuring skill or luck?</p>
   </hgroup>
   <article data-timings="">
     <p><img src="performance_results/zsm.png" alt=""></p>
+
+<!--
+looks similar to Monte Carlo
+no distributional assumptions, only based on constraints
+assessment of the opportunity set available to a fund manager with a given strategy.
+can use whatever measure of utility
+-->
 
   </article>
   <!-- Presenter Notes -->
@@ -37723,7 +37801,6 @@ Are we measuring skill or luck?</p>
 <!--
 * Chosen to represent investing in hedge funds with different styles
 * Not necessarily investable
-* Style definitions
 -->
 
   </article>
@@ -37795,6 +37872,7 @@ We are actually using modified ES to take into account the higher moments becaus
 
 <!--
 talk about neighbor portfolios
+could use this as a threshold for rebalancing
 -->
 
   </article>
@@ -37806,7 +37884,7 @@ talk about neighbor portfolios
     <h2>Maximize CRRA</h2>
   </hgroup>
   <article data-timings="">
-    <p>Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martellini paper. We use the same data as Example 3.</p>
+    <p>Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martellini paper. </p>
 
 <p>\[
 \begin{aligned}
@@ -37845,6 +37923,7 @@ EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) +
 
 <!--
 what results? what lambda?
+lambda=10
 
 It is very interesting to look at the feasible space in terms of different measures for risk. It appears that the optimal CRRA portfolio is close to the minimum StdDev portfolio, but nowhere near the minimum ES portfolio.
 -->
@@ -37865,13 +37944,15 @@ It is very interesting to look at the feasible space in terms of different measu
 </ul>
 
 <!--
+DEoptim is a global optimization in the class of genetic algorithms
+
+DEoptim only supports box constraints
+
 constraints implemented in random portfolios now implemented in DEoptim
 
 random portfolio logic is used in a 
 
-DEoptim only supports box constraints
-
-an optional function that will be run after each population is created, but before the population is passed to the objective function. This allows the user to impose integer/cardinality constriants.
+mapping function an optional function that will be run after each population is created, but before the population is passed to the objective function. This allows the user to impose integer/cardinality constriants.
 -->
 
   </article>
@@ -37884,15 +37965,9 @@ an optional function that will be run after each population is created, but befo
   </hgroup>
   <article data-timings="">
     <ul>
-<li>Introduced the goals and summary of PortfolioAnalytics</li>
-<li>Demonstrated the flexibility through examples</li>
-<li>Exciting plans for GSOC 2014
-
-<ul>
-<li>Support for regime switching</li>
-<li>Support for supervised learning</li>
-<li>many more</li>
-</ul></li>
+<li>Introduced algorithms and applications for random portfolios</li>
+<li>Demonstrated the flexibility by example</li>
+<li>More work to do on algorithms and applications</li>
 </ul>
 
 <h4>Acknowledgements</h4>
@@ -37900,7 +37975,7 @@ an optional function that will be run after each population is created, but befo
 <p>Many thanks to...</p>
 
 <ul>
-<li>UW CF&amp;RM Program</li>
+<li>UW CF&amp;RM Program faculty</li>
 <li>GSoC Mentors: Brian Peterson, Peter Carl, Doug Martin, and Guy Yollin</li>
 </ul>
 
@@ -37942,13 +38017,13 @@ an optional function that will be run after each population is created, but befo
     <ul>
       <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=1 title='What is a random portfolio?'>
+        data-slide=1 title='Why Random Portfolios?'>
          1
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=2 title='Why Random Portfolios?'>
+        data-slide=2 title='What is a random portfolio?'>
          2
       </a>
     </li>
