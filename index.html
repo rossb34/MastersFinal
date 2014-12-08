@@ -59,7 +59,7 @@
 <li>Visualize feasible space</li>
 <li>Easily parallelizable</li>
 </ul></li>
-<li>Performance Measurement</li>
+<li>Performance Measurement and Mandates</li>
 <li>Extend differential evolution algorithm</li>
 <li>Trading Strategy Paremeter Optimization</li>
 </ul>
@@ -37657,35 +37657,26 @@ sample and simplex are very similar (mostly because of the choice of constraints
   <article data-timings="">
     <h3>Annual Information Ratio Comparison</h3>
 
-<p>TODO: explain data, benchmarks, etc.
-Are we measuring skill or luck?</p>
+<p>Three artificial benchmarks</p>
+
+<ul>
+<li>equal weight</li>
+<li>random portfolio 1</li>
+<li>random portfolio 2</li>
+</ul>
+
+<p>Weekly returns 35 stocks from a CRSP data set.</p>
 
 <!--
 most performance analysis is relative to a benchmark
 
-three artificial benchmarks
-- equal weight
-- random portfolio 1
-- random portfolio 2
-
-data
-
-
-constraints
-
-* In some quarters there is a strong tendency for the benchmark to outperform  the random portfolios, in others a strong tendency for the benchmark to underperform.
-
-* A benchmark will be hard to beat during periods when the most heavily weighted assets in the benchmark happen to do well. Likewise, when the assets with large weights in the benchmark do relatively poorly, then the benchmark will be easy to beat.
-
-* Clearly the more unequal the weights in a benchmark, the more extreme the swings will be in the probability of outperforming. In this regard, the random benchmarks that are used here are not at all extreme compared to many indices that are used in practice as benchmarks.
+0.01 <= w_i <= 0.2
+Large and mid cap 0.1 and 0.5
+small cap 0 and 0.1
 
 * The measurement of skill with random portfolios avoids some of the noise that is introduced when performance is measured relative to a benchmark.
 
 * need to know constraints
-
-* explain general approach
-* problems with traditional approach
-* advantages of using random portfolios
 -->
 
   </article>
@@ -37698,6 +37689,14 @@ constraints
   </hgroup>
   <article data-timings="">
     <p><img src="performance_results/ir.png" alt=""></p>
+
+<!--
+* In some quarters there is a strong tendency for the benchmark to outperform  the random portfolios, in others a strong tendency for the benchmark to underperform.
+
+* A benchmark will be hard to beat during periods when the most heavily weighted assets in the benchmark happen to do well. Likewise, when the assets with large weights in the benchmark do relatively poorly, then the benchmark will be easy to beat.
+
+* Clearly the more unequal the weights in a benchmark, the more extreme the swings will be in the probability of outperforming. In this regard, the random benchmarks that are used here are not at all extreme compared to many indices that are used in practice as benchmarks.
+-->
 
   </article>
   <!-- Presenter Notes -->
@@ -37741,7 +37740,7 @@ Other uses of random portfolios include the assessment of the opportunity set av
 looks similar to Monte Carlo
 no distributional assumptions, only based on constraints
 assessment of the opportunity set available to a fund manager with a given strategy.
-can use whatever measure of utility
+can use whatever measure of utility, performance, risk
 -->
 
   </article>
@@ -37915,16 +37914,13 @@ EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) +
 
 <slide class="" id="slide-24" style="background:;">
   <hgroup>
-    <h2>Chart Results</h2>
+    <h2>Maximum CRRA in Risk-Return Space</h2>
   </hgroup>
   <article data-timings="">
     <p><img src="figures/crra_RR_ES.png" alt="">
 <img src="figures/crra_RR_StdDev.png" alt=""></p>
 
 <!--
-what results? what lambda?
-lambda=10
-
 It is very interesting to look at the feasible space in terms of different measures for risk. It appears that the optimal CRRA portfolio is close to the minimum StdDev portfolio, but nowhere near the minimum ES portfolio.
 -->
 
@@ -37944,6 +37940,8 @@ It is very interesting to look at the feasible space in terms of different measu
 </ul>
 
 <!--
+Extensions to other optimizers
+
 DEoptim is a global optimization in the class of genetic algorithms
 
 DEoptim only supports box constraints
@@ -38155,7 +38153,7 @@ mapping function an optional function that will be run after each population is 
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=24 title='Chart Results'>
+        data-slide=24 title='Maximum CRRA in Risk-Return Space'>
          24
       </a>
     </li>

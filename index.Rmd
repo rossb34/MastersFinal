@@ -14,7 +14,7 @@ mode        : selfcontained
   * Non-convex and complex objective functions
   * Visualize feasible space
   * Easily parallelizable
-* Performance Measurement
+* Performance Measurement and Mandates
 * Extend differential evolution algorithm
 * Trading Strategy Paremeter Optimization
 
@@ -247,41 +247,37 @@ sample and simplex are very similar (mostly because of the choice of constraints
 
 ## Performance Measurement
 ### Annual Information Ratio Comparison
-TODO: explain data, benchmarks, etc.
-Are we measuring skill or luck?
+Three artificial benchmarks
+* equal weight
+* random portfolio 1
+* random portfolio 2
+
+Weekly returns 35 stocks from a CRSP data set.
 
 <!--
 most performance analysis is relative to a benchmark
 
-three artificial benchmarks
-- equal weight
-- random portfolio 1
-- random portfolio 2
-
-data
-
-
-constraints
-
-* In some quarters there is a strong tendency for the benchmark to outperform  the random portfolios, in others a strong tendency for the benchmark to underperform.
-
-* A benchmark will be hard to beat during periods when the most heavily weighted assets in the benchmark happen to do well. Likewise, when the assets with large weights in the benchmark do relatively poorly, then the benchmark will be easy to beat.
-
-* Clearly the more unequal the weights in a benchmark, the more extreme the swings will be in the probability of outperforming. In this regard, the random benchmarks that are used here are not at all extreme compared to many indices that are used in practice as benchmarks.
+0.01 <= w_i <= 0.2
+Large and mid cap 0.1 and 0.5
+small cap 0 and 0.1
 
 * The measurement of skill with random portfolios avoids some of the noise that is introduced when performance is measured relative to a benchmark.
 
 * need to know constraints
-
-* explain general approach
-* problems with traditional approach
-* advantages of using random portfolios
 -->
 
 ---
 
 ## Information Ratio
 ![](performance_results/ir.png)
+
+<!--
+* In some quarters there is a strong tendency for the benchmark to outperform  the random portfolios, in others a strong tendency for the benchmark to underperform.
+
+* A benchmark will be hard to beat during periods when the most heavily weighted assets in the benchmark happen to do well. Likewise, when the assets with large weights in the benchmark do relatively poorly, then the benchmark will be easy to beat.
+
+* Clearly the more unequal the weights in a benchmark, the more extreme the swings will be in the probability of outperforming. In this regard, the random benchmarks that are used here are not at all extreme compared to many indices that are used in practice as benchmarks.
+-->
 
 ---
 
@@ -311,7 +307,7 @@ Other uses of random portfolios include the assessment of the opportunity set av
 looks similar to Monte Carlo
 no distributional assumptions, only based on constraints
 assessment of the opportunity set available to a fund manager with a given strategy.
-can use whatever measure of utility
+can use whatever measure of utility, performance, risk
 -->
 
 ---
@@ -420,14 +416,11 @@ $$
 
 ---
 
-## Chart Results
+## Maximum CRRA in Risk-Return Space
 ![](figures/crra_RR_ES.png)
 ![](figures/crra_RR_StdDev.png)
 
 <!--
-what results? what lambda?
-lambda=10
-
 It is very interesting to look at the feasible space in terms of different measures for risk. It appears that the optimal CRRA portfolio is close to the minimum StdDev portfolio, but nowhere near the minimum ES portfolio.
 -->
 
@@ -440,6 +433,8 @@ It is very interesting to look at the feasible space in terms of different measu
 
 
 <!--
+Extensions to other optimizers
+
 DEoptim is a global optimization in the class of genetic algorithms
 
 DEoptim only supports box constraints
