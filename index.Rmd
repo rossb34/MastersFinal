@@ -1,6 +1,6 @@
 ---
 title       : Random Portfolios
-subtitle    : CFRM Final Presentation
+subtitle    : CFRM Final Presentation December 8, 2014
 author      : Ross Bennett
 date        : December 8, 2014
 framework   : io2012 # {io2012, html5slides, shower, dzslides, ...}
@@ -21,6 +21,7 @@ mode        : selfcontained
 <!--
 Intro slide
 give a brief overview of each bullet point
+focus on usefulness and application of random portfolios
 -->
 
 ---
@@ -245,6 +246,19 @@ sample and simplex are very similar (mostly because of the choice of constraints
 
 ---
 
+## Visualizing Constrained Feasible Space
+![](figures/Rplot.png)
+
+<!--
+The feasible space is computed using the EDHEC data for a long only portfolio with a search size of 2000.
+
+Note how grid search does not cover the boundary very well
+
+sample and simplex are very similar (mostly because of the choice of constraints. More restrictive constraints would mean fewer dots for simplex method
+-->
+
+---
+
 ## Performance Measurement
 ### Annual Information Ratio Comparison
 Three artificial benchmarks
@@ -252,7 +266,7 @@ Three artificial benchmarks
 * random portfolio 1
 * random portfolio 2
 
-Weekly returns 35 stocks from a CRSP data set.
+Weekly returns 35 stocks from 1997-01-07 to 2010-12-28.
 
 <!--
 most performance analysis is relative to a benchmark
@@ -472,5 +486,3 @@ Many thanks to...
 
 ---
 
-## References
-TODO

@@ -121,3 +121,39 @@ if(file.exists("figures/fev_plot.png")){
   par(mfrow=c(1,1))
   dev.off()
 }
+
+portf <- portfolio.spec(colnames(R))
+portf <- add.constraint(portf, type="weight_sum", 
+                        min_sum=0.99, max_sum=1.01)
+portf.lo <- add.constraint(portf, type="long_only")
+portf.box1 <- add.constraint(portf, type="box", min=0.01, max=0.4)
+portf.box2 <- add.constraint(portf, type="box", min=0.05, max=0.2)
+
+
+rp.lo <- random_portfolios(portf.lo, permutations=6000, rp_method='sample')
+rp.box1 <- random_portfolios(portf.box1, permutations=6000, rp_method='sample')
+rp.box2 <- random_portfolios(portf.box2, permutations=6000, rp_method='sample')
+
+rp.lo.mean <- apply(rp.lo, 1, function(x) mean(R %*% x))
+rp.lo.StdDev <- apply(rp.lo, 1, function(x) StdDev(R, weights=x))
+rp.box1.mean <- apply(rp.box1, 1, function(x) mean(R %*% x))
+rp.box1.StdDev <- apply(rp.box1, 1, function(x) StdDev(R, weights=x))
+rp.box2.mean <- apply(rp.box2, 1, function(x) mean(R %*% x))
+rp.box2.StdDev <- apply(rp.box2, 1, function(x) StdDev(R, weights=x))
+x.assets <- StdDev(R)
+y.assets <- colMeans(R)
+x.lower <- min(x.assets) * 0.9
+x.upper <- max(x.assets) * 1.1
+y.lower <- min(y.assets) * 0.9
+y.upper <- max(y.assets) * 1.1
+png("figures/Rplot.png", height = 500, width = 1000)
+plot(x=rp.lo.StdDev, y=rp.lo.mean, col=my_colors[2], main="Constrained Feasible Space", 
+     ylab="mean", xlab="StdDev", xlim=c(x.lower, x.upper), 
+     ylim=c(y.lower, y.upper))
+points(x=rp.box1.StdDev, y=rp.box1.mean, col=my_colors[4], pch=2)
+points(x=rp.box2.StdDev, y=rp.box2.mean, col=my_colors[6], pch=5)
+points(x=x.assets, y=y.assets)
+text(x=x.assets, y=y.assets, labels=colnames(R), pos=4, cex=0.8)
+legend("right", legend=c("w_i >= 0", "0.01 <= w_i <= 0.4", "0.05 <= w_i <= 0.2"), 
+       col=my_colors[c(2,4,6)], pch=c(1, 2, 5), bty="n")
+dev.off()
